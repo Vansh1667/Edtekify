@@ -8,24 +8,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.Admin.dto.SignupRequest;
+import com.example.Admin.entity.Admin;
 import com.example.Admin.entity.Role;
-import com.example.Admin.entity.User;
-import com.example.Admin.repository.UserRepository;
+import com.example.Admin.repository.AdminRepository;
 import com.example.Admin.services.AuthService;
 import com.example.Admin.util.JwtUtil;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     public AuthServiceImpl(
-            UserRepository userRepository,
+            AdminRepository adminRepository,
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil) {
-        this.userRepository = userRepository;
+        this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
@@ -39,16 +39,16 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String normalizedEmail = request.getEmail().trim();
-        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
+        if (adminRepository.findByEmail(normalizedEmail).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", "Email already exists"));
         }
 
-        User user = new User();
-        user.setEmail(normalizedEmail);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.ORG_ADMIN);
-        userRepository.save(user);
+        Admin admin = new Admin();
+        admin.setEmail(normalizedEmail);
+        admin.setPassword(passwordEncoder.encode(request.getPassword()));
+        admin.setRole(Role.ORG_ADMIN);
+        adminRepository.save(admin);
 
 //        String token = jwtUtil.generateToken(user.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
